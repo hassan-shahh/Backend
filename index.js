@@ -130,6 +130,30 @@ app.post('/login', (req, res) => {
         
     
     })
-
+    app.post('/loginauth', (req, res) => {
+        let emp = req.body;
+       
+       mysqlConnection.query("SELECT * FROM user WHERE Email=? and Password =?",[emp.Email,emp.Password], (err, rows, fields) => {
+        if (rows.length>0){
+            res.send("Success")}
+            else{
+            res.send("Fail")}
+        })
+        
+    
+    })  
+    
+    app.post('/reservation', (req, res) => {
+        let emp = req.body;
+       
+       mysqlConnection.query("INSERT INTO request(BloodTag,Status,Location,Donorcount,Dateofrequest,Cause,Blood_type) VALUES(?,?,?,?,?,?,?)",[emp.BloodTag,emp.Status,emp.Location,emp.Donorcount,emp.Dateofrequest,emp.Cause,emp.Bloodtype], (err, rows, fields) => {
+        if (!err){
+            res.send("Success")}
+            else{
+            console.log(err)}
+        })
+        
+    
+    })
     
   
