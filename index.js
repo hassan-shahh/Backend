@@ -1,5 +1,6 @@
  const mysql = require('mysql');
 const express = require('express');
+const jswt = require('jsonwebtoken');
 var app = express();
 var cors = require('cors');
 app.use(cors());
@@ -67,7 +68,7 @@ app.post('/employees', (req, res) => {
             console.log(err)
     })
 
-})*/
+}) */
 app.post('/signupp', (req, res) => {
     let emp = req.body;
    var sql = "INSERT INTO user(FirstName,LastName,Gender,BloodTag,Age,Address,ContactNo,Email,Password) VALUES (?,?,?,?,?,?,?,?,?);"
@@ -155,5 +156,65 @@ app.post('/login', (req, res) => {
         
     
     })
+    app.post('/show', (req, res) => {
+        let emp = req.body;
+       
+       mysqlConnection.query("SELECT * FROM request WHERE BloodTag =?",[emp.BloodTag], (err, rows, fields) => {
+        if (rows.length>0){
+            res.send(rows)}
+            else{
+            res.send("No blood type found")}
+        })
+        
+    
+    }) 
+   
+    app.post('/log', (req, res) => {
+        let emp = req.body;
+     
+       mysqlConnection.query("SELECT * FROM user WHERE Email=? and Password =?",[emp.Email,emp.Password], (err, rows, fields) => {
+           if(rows.length>0){
+               var users = {
+                   id : rows[0].userID,
+                   email : emp.Email
+               }
+           }
+           else
+                res.send("Fail")
+        jswt.sign(users , 'secretkey', (err,token) => {
+            if(!err)
+            res.json({token})
+            else
+            console.log(err)
+        })
+    })
+    
+    })  
+
+    function verifytoken(req,res,next){
+
+        const bearerheader = req.headers['authorization'];
+        if(typeof bearerheader !== 'undefined'){
+         const arr=  bearerheader.split(" ")
+         req.token = arr[1]
+         next();
+        }
+        else
+        res.sendStatus(403);
+
+    }
+    app.post('/authen' , verifytoken, (req,res) => {
+        jswt.verify(req.token, 'secretkey' ,(err,dataa) =>{
+            if(!err){
+                res.json({
+                    statement : "Accesss Granted",
+                    dataa
+                })
+                }
+                else
+                res.sendStatus(403)
+            })
+        })
+    
     
   
